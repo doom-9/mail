@@ -19,7 +19,9 @@
     "e2e": "playwright test"
   },
   "dependencies": {
+    "@apollo/client": "^3.7.14",
     "electron-updater": "^5.3.0",
+    "graphql": "^16.6.0",
     "imap": "^0.8.19"
   },
   "devDependencies": {
