@@ -1,71 +1,47 @@
 import { ipcMain } from "electron";
+import { ImapFlow } from 'imapflow'
+import { MailParser } from 'mailparser'
 
-var Imap = require('imap'),
-    inspect = require('util').inspect;
 
-var imap = new Imap({
-  user: 'dddm56605@gmail.com',
-  password: 'dezhjpodramscaia',
-  host: 'imap.gmail.com',
-  port: 993,
-  tls: true,
-  tlsOptions: { servername: 'imap.gmail.com' }
-});
 
-function openInbox(cb) {
-  imap.openBox('INBOX', true, cb);
-}
-
-imap.once('ready', function() {
-  openInbox(function(err, box) {
-    if (err) throw err;
-    var f = imap.seq.fetch('1:3', {
-      bodies: 'HEADER.FIELDS (FROM TO SUBJECT DATE)',
-      struct: true
-    });
-    f.on('message', function(msg, seqno) {
-      console.log('Message #%d', seqno);
-      var prefix = '(#' + seqno + ') ';
-      msg.on('body', function(stream, info) {
-        var buffer = '';
-        stream.on('data', function(chunk) {
-          buffer += chunk.toString('utf8');
-        });
-        stream.once('end', function() {
-          console.log(prefix + 'Parsed header: %s', inspect(Imap.parseHeader(buffer)));
-        });
-      });
-      msg.once('attributes', function(attrs) {
-        console.log(prefix + 'Attributes: %s', inspect(attrs, false, 8));
-      });
-      msg.once('end', function() {
-        console.log(prefix + 'Finished');
-      });
-    });
-    f.once('error', function(err) {
-      console.log('Fetch error: ' + err);
-    });
-    f.once('end', function() {
-      console.log('Done fetching all messages!');
-      imap.end();
-    });
+const main = async (user: string, pass: string) => {
+  const client = new ImapFlow({
+    host: 'imap.gmail.com',
+    port: 993,
+    secure: true,
+    auth: {
+      user,
+      pass
+    }
   });
-});
 
-imap.once('error', function(err) {
-  console.log(err);
-});
+  await client.connect();
 
-imap.once('end', function() {
-  console.log('Connection ended');
-});
+  let lock = await client.getMailboxLock('INBOX');
 
+  let length = typeof client.mailbox === 'boolean' ? 0 : client.mailbox.exists
 
+  const messageArray = []
+  try {
+    for await (let message of client.fetch([1, 2, 3], { envelope: true, source: true })) {
+      messageArray.push(message)
+    }
+  } finally {
+    lock.release();
+  }
+  await client.logout();
 
+  return {
+    mail: messageArray,
+    length
+  }
+};
 
-ipcMain.on('imap', (_event, ...args) => {
-  console.log(2);
-  
-  imap.connect();
-
+ipcMain.handle('imap', async (_event, type: 'Gmail' | 'Outlook', user: string, pass: string) => {
+  try {
+    const res = await main(user, pass)
+    return res
+  } catch (error) {
+    return ''
+  }
 })
