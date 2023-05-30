@@ -17,24 +17,20 @@ const GET_LOCATIONS = gql`
 function login() {
   const { loading, error, data } = useQuery(GET_LOCATIONS);
 
-  const [user, setUser] = useState("");
+  const [user, setUser] = useState("dddm56605@gmail.com");
 
-  const checkTheNewEmailRegularly = async () => {
+  const [pass, setPass] = useState("dezhjpodramscaia");
+
+  const getTheTotalNumberOfEmails = async () => {
     try {
-      const res = await ipcRenderer.invoke("imap");
-      const { length, mail } = res;
-      console.log(res);
-      localStorage.setItem("numberOfBackupEmails", String(length));
+      const res = await ipcRenderer.invoke("getEmailCount", user, pass);
+      localStorage.setItem("numberOfBackupEmails", String(res));
     } catch (error) {
       message.error(JSON.stringify(error));
     }
   };
 
-  useEffect(() => {
-    // checkTheNewEmailRegularly();
-  }, []);
-
-  return <div>login</div>;
+  return <div onClick={getTheTotalNumberOfEmails}>login</div>;
 }
 
 export default login;
