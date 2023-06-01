@@ -1,10 +1,15 @@
-import { createBrowserRouter, Link } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 import Login from "../views/login/login";
+import List from "../views/list/list";
 
 const router = createBrowserRouter([
   {
     path: "/",
     Component: Login,
+  },
+  {
+    path: "/list",
+    Component: List,
   },
 ]);
 

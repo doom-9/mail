@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useQuery, gql } from "@apollo/client";
 import { ipcRenderer } from "electron";
-import { message, Button, Checkbox, Form, Input,Radio } from "antd";
+import { message, Button, Form, Input, Radio } from "antd";
 import styles from "./index.module.scss";
+import { useNavigate } from "react-router-dom";
 
 const GET_LOCATIONS = gql`
   query GetLocations {
@@ -16,16 +17,22 @@ const GET_LOCATIONS = gql`
 `;
 
 const options = [
-  { label: 'Gmail', value: '1' },
-  { label: 'HotMail', value: '2' },
-  { label: 'Outlook', value: '3' },
+  { label: "Gmail", value: "1" },
+  { label: "HotMail", value: "2" },
+  { label: "Outlook", value: "3" },
 ];
 
 function login() {
   const { loading, error, data } = useQuery(GET_LOCATIONS);
 
+  const navigate = useNavigate();
+
   const onFinish = (values: any) => {
     console.log("Success:", values);
+    localStorage.setItem('emailType','1')
+    localStorage.setItem('email','1')
+    localStorage.setItem('pass','1')
+    navigate("/list");
   };
 
   const onFinishFailed = (errorInfo: any) => {

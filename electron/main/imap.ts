@@ -1,53 +1,87 @@
 import { ipcMain } from "electron";
-import { ImapFlow } from 'imapflow'
-import { MailParser } from 'mailparser'
+import { ImapFlow } from "imapflow";
+import { MailParser } from "mailparser";
 
-
-
-const main = async (user: string, pass: string, count: number, totalCount: number) => {
-  const client = new ImapFlow({
-    host: 'imap.gmail.com',
+const mailConfigArray = [
+  {
+    key: "gmail",
+    host: "imap.gmail.com",
     port: 993,
+  },
+  {
+    key: "outlook",
+    host: "outlook.office365.com",
+    port: 993,
+  },
+];
+
+// 获取新邮件
+async function main(
+  type: string,
+  user: string,
+  pass: string,
+  count: number,
+  totalCount: number
+) {
+  const mailConfig = mailConfigArray.find((item) => item.key === type);
+
+  if (!mailConfig) {
+    throw Error("doNotSupportThisMailbox");
+  }
+
+  const client = new ImapFlow({
+    host: mailConfig.host,
+    port: mailConfig.port,
     secure: true,
     auth: {
       user,
-      pass
-    }
+      pass,
+    },
   });
 
   await client.connect();
 
-  let lock = await client.getMailboxLock('INBOX');
+  let lock = await client.getMailboxLock("INBOX");
 
-  const messageArray = []
+  const messageArray = [];
   try {
-    for await (let message of client.fetch(`${totalCount}:${totalCount - count}`, { envelope: true, source: true })) {
-      messageArray.push(message)
+    for await (let message of client.fetch(
+      `${totalCount}:${totalCount - count}`,
+      { envelope: true, source: true }
+    )) {
+      messageArray.push(message);
     }
   } finally {
     lock.release();
   }
   await client.logout();
 
-  return messageArray
-};
+  return messageArray;
+}
 
-async function getEmailCount(user: string, pass: string) {
+// 获取邮件总数量
+async function getEmailCount(type: string, user: string, pass: string) {
+  const mailConfig = mailConfigArray.find((item) => item.key === type);
+
+  if (!mailConfig) {
+    throw Error("doNotSupportThisMailbox");
+  }
+
   const client = new ImapFlow({
-    host: 'imap.gmail.com',
-    port: 993,
+    host: mailConfig.host,
+    port: mailConfig.port,
     secure: true,
     auth: {
       user,
-      pass
-    }
+      pass,
+    },
   });
 
   await client.connect();
 
-  let lock = await client.getMailboxLock('INBOX');
+  let lock = await client.getMailboxLock("INBOX");
 
-  let length = typeof client.mailbox === 'boolean' ? 0 : client.mailbox.exists
+  let length = typeof client.mailbox === "boolean" ? 0 : client.mailbox.exists;
 
   lock.release();
 
@@ -56,21 +90,33 @@ async function getEmailCount(user: string, pass: string) {
   return length;
 }
 
-
-ipcMain.handle('getTheLatestEmail', async (_event, user: string, pass: string, count: number, totalCount: number) => {
-  try {
-    const res = await main(user, pass, count, totalCount)
-    return res
-  } catch (error) {
-    return ''
+ipcMain.handle(
+  "getTheLatestEmail",
+  async (
+    _event,
+    type: string,
+    user: string,
+    pass: string,
+    count: number,
+    totalCount: number
+  ) => {
+    try {
+      const res = await main(type, user, pass, count, totalCount);
+      return res;
+    } catch (error) {
+      return "";
+    }
   }
-})
+);
 
-ipcMain.handle('totalNumberOfEmails', async (_event, user: string, pass: string) => {
-  try {
-    const res = await getEmailCount(user, pass)
-    return res
-  } catch (error) {
-    return 0
+ipcMain.handle(
+  "totalNumberOfEmails",
+  async (_event, type: string, user: string, pass: string) => {
+    try {
+      const res = await getEmailCount(type, user, pass);
+      return res;
+    } catch (error) {
+      return 0;
+    }
   }
-})
+);
