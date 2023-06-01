@@ -100,23 +100,13 @@ ipcMain.handle(
     count: number,
     totalCount: number
   ) => {
-    try {
-      const res = await main(type, user, pass, count, totalCount);
-      return res;
-    } catch (error) {
-      return "";
-    }
+    return await main(type, user, pass, count, totalCount);
   }
 );
 
 ipcMain.handle(
   "totalNumberOfEmails",
   async (_event, type: string, user: string, pass: string) => {
-    try {
-      const res = await getEmailCount(type, user, pass);
-      return res;
-    } catch (error) {
-      return 0;
-    }
+    return await getEmailCount(type, user, pass);
   }
 );
