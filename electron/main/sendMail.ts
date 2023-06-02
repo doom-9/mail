@@ -3,14 +3,19 @@ import nodemailer from "nodemailer";
 
 const mailConfigArray = [
   {
-    key: "gmail",
-    host: "smtp.gmail.com",
-    port: 587,
+    key: "1",
+    host: "imap.gmail.com",
+    port: 993,
   },
   {
-    key: "outlook",
-    host: "smtp.office365.com",
-    port: 587,
+    key: "2",
+    host: "outlook.office365.com",
+    port: 993,
+  },
+  {
+    key: "3",
+    host: "outlook.office365.com",
+    port: 993,
   },
 ];
 

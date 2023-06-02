@@ -4,12 +4,17 @@ import { MailParser } from "mailparser";
 
 const mailConfigArray = [
   {
-    key: "gmail",
+    key: "1",
     host: "imap.gmail.com",
     port: 993,
   },
   {
-    key: "outlook",
+    key: "2",
+    host: "outlook.office365.com",
+    port: 993,
+  },
+  {
+    key: "3",
     host: "outlook.office365.com",
     port: 993,
   },
@@ -37,6 +42,11 @@ async function main(
       user,
       pass,
     },
+    logger: false,
+  });
+
+  client.on("error", (err) => {
+    console.log(`imap Error occurred: ${err.message}`);
   });
 
   await client.connect();
@@ -75,6 +85,11 @@ async function getEmailCount(type: string, user: string, pass: string) {
       user,
       pass,
     },
+    logger: false,
+  });
+
+  client.on("error", (err) => {
+    console.log(`imap Error occurred: ${err.message}`);
   });
 
   await client.connect();
@@ -100,13 +115,23 @@ ipcMain.handle(
     count: number,
     totalCount: number
   ) => {
-    return await main(type, user, pass, count, totalCount);
+    try {
+      const res = await main(type, user, pass, count, totalCount);
+      return res;
+    } catch (error) {
+      return JSON.stringify(error);
+    }
   }
 );
 
 ipcMain.handle(
   "totalNumberOfEmails",
   async (_event, type: string, user: string, pass: string) => {
-    return await getEmailCount(type, user, pass);
+    try {
+      const res = await getEmailCount(type, user, pass);
+      return res;
+    } catch (error) {
+      return JSON.stringify(error);
+    }
   }
 );

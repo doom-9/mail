@@ -29,15 +29,24 @@ function login() {
 
   const onFinish = (values: any) => {
     console.log("Success:", values);
-    localStorage.setItem('emailType','1')
-    localStorage.setItem('email','1')
-    localStorage.setItem('pass','1')
+    const { email, emailType, password, kunproKey } = values;
+    localStorage.setItem("emailType", emailType);
+    localStorage.setItem("email", email);
+    localStorage.setItem("pass", password);
+    localStorage.setItem("kunproKey", kunproKey);
+
     navigate("/list");
   };
 
   const onFinishFailed = (errorInfo: any) => {
     console.log("Failed:", errorInfo);
   };
+
+  useEffect(() => {
+    if (localStorage.getItem("kunproKey") !== null) {
+      navigate("/list");
+    }
+  }, []);
 
   return (
     <div className={styles.content}>
