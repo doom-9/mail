@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { useQuery, gql } from "@apollo/client";
+import { useQuery, gql, useLazyQuery } from "@apollo/client";
 import { ipcRenderer } from "electron";
 import { message, Button, Form, Input, Radio } from "antd";
 import styles from "./index.module.scss";
 import { useNavigate } from "react-router-dom";
 
-const GET_LOCATIONS = gql`
-  query GetLocations {
-    locations {
+const GET_TOKENS = gql`
+  query Query($token: String!) {
+    queryToken(token: $token) {
+      created_at
       id
       name
-      description
-      photo
+      status
+      token
+      updated_at
     }
   }
 `;
@@ -23,19 +25,21 @@ const options = [
 ];
 
 function login() {
-  const { loading, error, data } = useQuery(GET_LOCATIONS);
+  const [getTokens, { loading, error, data }] = useLazyQuery(GET_TOKENS, {
+    variables: {
+      token: "3cddee90-65ae-4ff6-ae82-d5db631047c6",
+    },
+  });
 
   const navigate = useNavigate();
 
   const onFinish = (values: any) => {
-    console.log("Success:", values);
     const { email, emailType, password, kunproKey } = values;
+    getTokens();
     localStorage.setItem("emailType", emailType);
     localStorage.setItem("email", email);
     localStorage.setItem("pass", password);
     localStorage.setItem("kunproKey", kunproKey);
-
-    navigate("/list");
   };
 
   const onFinishFailed = (errorInfo: any) => {
