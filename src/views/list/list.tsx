@@ -64,52 +64,59 @@ function List() {
         );
 
         for (const item of newMailArray) {
-          addMail({
-            variables: {
-              input: {
-                email_id: item.emailId,
-                html_body: item.analyticalResults.html,
-                subject: item.envelope.subject,
-                text_body: item.analyticalResults.text,
-                date: item.envelope.date.getTime().toString(),
-                from_email: item.envelope.from[0].address,
-                token: kunproKey,
+          if (
+            [
+              "no-reply@expert.onthemarket.com",
+              "members@zoopla.co.uk",
+            ].includes(item.envelope.from[0].address || "")
+          ) {
+            addMail({
+              variables: {
+                input: {
+                  email_id: item.emailId,
+                  html_body: item.analyticalResults.html,
+                  subject: item.envelope.subject,
+                  text_body: item.analyticalResults.text,
+                  date: item.envelope.date.getTime().toString(),
+                  from_email: item.envelope.from[0].address,
+                  token: kunproKey,
+                },
               },
-            },
-            async onCompleted(data, clientOptions) {
-              try {
-                const {
-                  createLeadsForApp: { to, subject, html_body },
-                } = data;
+              async onCompleted(data, clientOptions) {
+                try {
+                  const {
+                    createLeadsForApp: { to, subject, html_body },
+                  } = data;
 
-                await ipcRenderer.invoke(
-                  "sendMail",
-                  emailType,
-                  email,
-                  pass,
-                  to,
-                  subject,
-                  html_body
-                );
+                  await ipcRenderer.invoke(
+                    "sendMail",
+                    emailType,
+                    email,
+                    pass,
+                    to,
+                    subject,
+                    html_body
+                  );
 
-                messageApi.open({
-                  type: "success",
-                  content: "sentSuccessfully",
-                });
-              } catch (error) {
+                  messageApi.open({
+                    type: "success",
+                    content: "sentSuccessfully",
+                  });
+                } catch (error) {
+                  messageApi.open({
+                    type: "error",
+                    content: JSON.stringify(error),
+                  });
+                }
+              },
+              onError(error, clientOptions) {
                 messageApi.open({
                   type: "error",
                   content: JSON.stringify(error),
                 });
-              }
-            },
-            onError(error, clientOptions) {
-              messageApi.open({
-                type: "error",
-                content: JSON.stringify(error),
-              });
-            },
-          });
+              },
+            });
+          }
         }
       }
     } catch (error) {
