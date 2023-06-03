@@ -4,18 +4,18 @@ import nodemailer from "nodemailer";
 const mailConfigArray = [
   {
     key: "1",
-    host: "imap.gmail.com",
-    port: 993,
+    host: "smtp.gmail.com",
+    port: 587,
   },
   {
     key: "2",
-    host: "outlook.office365.com",
-    port: 993,
+    host: "smtp-mail.outlook.com",
+    port: 587,
   },
   {
     key: "3",
-    host: "outlook.office365.com",
-    port: 993,
+    host: "smtp-mail.outlook.com",
+    port: 587,
   },
 ];
 
@@ -37,7 +37,7 @@ function main(
     let transporter = nodemailer.createTransport({
       host: mailConfig.host,
       port: mailConfig.port,
-      secure: true,
+      requireTLS: true,
       auth: {
         user,
         pass,
@@ -73,7 +73,7 @@ ipcMain.handle(
     html: string
   ) => {
     try {
-      const res = await await main(type, user, pass, to, subject, html);
+      const res = await main(type, user, pass, to, subject, html);
       return res;
     } catch (error) {
       return JSON.stringify(error);

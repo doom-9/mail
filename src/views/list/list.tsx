@@ -12,10 +12,7 @@ const ADD_MAIL = gql`
       email_id
       html_body
       subject
-      text_body
-      date
-      from_email
-      token
+      to
     }
   }
 `;
@@ -37,8 +34,6 @@ function List() {
 
   // 每十分钟检查一次邮件数量
   async function checkTheNewMail() {
-    console.log("执行一次");
-
     try {
       const numberOfCacheMail = Number(
         localStorage.getItem("numberOfCacheMail")
@@ -69,20 +64,53 @@ function List() {
         for (const item of newMailArray) {
           addMail({
             variables: {
-              email_id: item.emailId,
-              html_body: item.analyticalResults.html,
-              subject: item.envelope.subject,
-              text_body: item.analyticalResults.text,
-              date: item.envelope.date.getTime(),
-              from_email: item.envelope.from[0].address,
-              token: kunproKey,
+              input: {
+                email_id: item.emailId,
+                html_body: item.analyticalResults.html,
+                subject: item.envelope.subject,
+                text_body: item.analyticalResults.text,
+                date: item.envelope.date.getTime().toString(),
+                from_email: item.envelope.from[0].address,
+                token: kunproKey,
+              },
+            },
+            async onCompleted(data, clientOptions) {
+              try {
+                const {
+                  createLeadsForApp: { to, subject, html_body },
+                } = data;
+
+                await ipcRenderer.invoke(
+                  "sendMail",
+                  emailType,
+                  email,
+                  pass,
+                  to,
+                  subject,
+                  html_body
+                );
+
+                messageApi.open({
+                  type: "success",
+                  content: "sentSuccessfully",
+                });
+              } catch (error) {
+                messageApi.open({
+                  type: "error",
+                  content: JSON.stringify(error),
+                });
+              }
+            },
+            onError(error, clientOptions) {
+              messageApi.open({
+                type: "error",
+                content: JSON.stringify(error),
+              });
             },
           });
         }
       }
     } catch (error) {
-      console.log(error);
-
       messageApi.open({
         type: "error",
         content: JSON.stringify(error),

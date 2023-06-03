@@ -3,6 +3,7 @@ import { release } from 'node:os'
 import { join } from 'node:path'
 import { update } from './update'
 import './imap'
+import './sendMail'
 
 // The built directory structure
 //
