@@ -47,6 +47,7 @@ function login() {
           type: "success",
           content: "successfulBinding",
         });
+        navigate("/list");
       },
       onError(error) {
         messageApi.open({

@@ -1,6 +1,6 @@
 import { ipcMain } from "electron";
 import { ImapFlow } from "imapflow";
-import { MailParser } from "mailparser";
+import { simpleParser } from "mailparser";
 
 const mailConfigArray = [
   {
@@ -59,7 +59,11 @@ async function main(
       `${totalCount}:${totalCount - count}`,
       { envelope: true, source: true }
     )) {
-      messageArray.push(message);
+      const res = await simpleParser(message.source);
+      messageArray.push({
+        ...message,
+        analyticalResults: res,
+      });
     }
   } finally {
     lock.release();

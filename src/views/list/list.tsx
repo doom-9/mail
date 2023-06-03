@@ -1,20 +1,44 @@
 import React, { useEffect, useState } from "react";
 import { ipcRenderer } from "electron";
 import { message } from "antd";
+import { gql, useMutation } from "@apollo/client";
+import { FetchMessageObject } from "imapflow";
 
-function login() {
+import { ParsedMail } from "mailparser";
+
+const ADD_MAIL = gql`
+  mutation CreateLeadsForApp($input: NewEmailLeadsInput!) {
+    createLeadsForApp(input: $input) {
+      email_id
+      html_body
+      subject
+      text_body
+      date
+      from_email
+      token
+    }
+  }
+`;
+
+function List() {
   const emailType = localStorage.getItem("emailType") || "";
 
   const email = localStorage.getItem("email") || "";
 
   const pass = localStorage.getItem("pass") || "";
 
+  const kunproKey = localStorage.getItem("kunproKey") || "";
+
   const [Timer, setTimer] = useState<NodeJS.Timer | null>(null);
 
   const [messageApi, contextHolder] = message.useMessage();
 
+  const [addMail] = useMutation(ADD_MAIL);
+
   // 每十分钟检查一次邮件数量
   async function checkTheNewMail() {
+    console.log("执行一次");
+
     try {
       const numberOfCacheMail = Number(
         localStorage.getItem("numberOfCacheMail")
@@ -31,18 +55,34 @@ function login() {
 
       // 对比出新邮件
       if (res > numberOfCacheMail) {
-        const newMailArray = await ipcRenderer.invoke(
+        const newMailArray: (FetchMessageObject & {
+          analyticalResults: ParsedMail;
+        })[] = await ipcRenderer.invoke(
           "getTheLatestEmail",
           emailType,
           email,
           pass,
-          res - numberOfCacheMail,
+          res - numberOfCacheMail - 1,
           res
         );
 
-        console.log(newMailArray);
+        for (const item of newMailArray) {
+          addMail({
+            variables: {
+              email_id: item.emailId,
+              html_body: item.analyticalResults.html,
+              subject: item.envelope.subject,
+              text_body: item.analyticalResults.text,
+              date: item.envelope.date.getTime(),
+              from_email: item.envelope.from[0].address,
+              token: kunproKey,
+            },
+          });
+        }
       }
     } catch (error) {
+      console.log(error);
+
       messageApi.open({
         type: "error",
         content: JSON.stringify(error),
@@ -62,11 +102,13 @@ function login() {
 
       localStorage.setItem("numberOfCacheMail", String(res));
 
-      setTimer(
-        setInterval(() => {
-          checkTheNewMail();
-        }, 10 * 60 * 1000)
-      );
+      if (!Timer) {
+        setTimer(
+          setInterval(() => {
+            checkTheNewMail();
+          }, 1 * 60 * 1000)
+        );
+      }
     } catch (error) {
       messageApi.open({
         type: "error",
@@ -77,7 +119,6 @@ function login() {
 
   useEffect(() => {
     getTheNumberOfInitialEmails();
-
     return () => {
       if (Timer) {
         clearInterval(Timer);
@@ -85,7 +126,12 @@ function login() {
     };
   }, []);
 
-  return <div>111</div>;
+  return (
+    <>
+      {contextHolder}
+      <div>111</div>
+    </>
+  );
 }
 
-export default login;
+export default List;

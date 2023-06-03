@@ -25,7 +25,7 @@ function main(
   pass: string,
   to: string,
   subject: string,
-  text: string
+  html: string
 ) {
   return new Promise((resolve, reject) => {
     const mailConfig = mailConfigArray.find((item) => item.key === type);
@@ -48,7 +48,7 @@ function main(
       from: user,
       to,
       subject,
-      text,
+      html,
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
@@ -70,8 +70,13 @@ ipcMain.handle(
     pass: string,
     to: string,
     subject: string,
-    text: string
+    html: string
   ) => {
-    return await main(type, user, pass, to, subject, text);
+    try {
+      const res = await await main(type, user, pass, to, subject, html);
+      return res;
+    } catch (error) {
+      return JSON.stringify(error);
+    }
   }
 );
