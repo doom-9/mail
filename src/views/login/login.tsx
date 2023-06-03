@@ -25,21 +25,36 @@ const options = [
 ];
 
 function login() {
-  const [getTokens, { loading, error, data }] = useLazyQuery(GET_TOKENS, {
-    variables: {
-      token: "3cddee90-65ae-4ff6-ae82-d5db631047c6",
-    },
-  });
-
   const navigate = useNavigate();
+
+  const [messageApi, contextHolder] = message.useMessage();
+
+  const [getTokens] = useLazyQuery(GET_TOKENS);
 
   const onFinish = (values: any) => {
     const { email, emailType, password, kunproKey } = values;
-    getTokens();
-    localStorage.setItem("emailType", emailType);
-    localStorage.setItem("email", email);
-    localStorage.setItem("pass", password);
-    localStorage.setItem("kunproKey", kunproKey);
+
+    getTokens({
+      variables: {
+        token: kunproKey,
+      },
+      onCompleted(data) {
+        localStorage.setItem("emailType", emailType);
+        localStorage.setItem("email", email);
+        localStorage.setItem("pass", password);
+        localStorage.setItem("kunproKey", kunproKey);
+        messageApi.open({
+          type: "success",
+          content: "successfulBinding",
+        });
+      },
+      onError(error) {
+        messageApi.open({
+          type: "error",
+          content: "kunprokeyError",
+        });
+      },
+    });
   };
 
   const onFinishFailed = (errorInfo: any) => {
@@ -53,59 +68,64 @@ function login() {
   }, []);
 
   return (
-    <div className={styles.content}>
-      <Form
-        name="basic"
-        labelCol={{ span: 8 }}
-        wrapperCol={{ span: 16 }}
-        style={{ minWidth: 400 }}
-        onFinish={onFinish}
-        onFinishFailed={onFinishFailed}
-        autoComplete="off"
-      >
-        <Form.Item
-          label="Email type"
-          name="emailType"
-          rules={[
-            { required: true, message: "Please select your Email type!" },
-          ]}
+    <>
+      {contextHolder}
+      <div className={styles.content}>
+        <Form
+          name="basic"
+          labelCol={{ span: 8 }}
+          wrapperCol={{ span: 16 }}
+          style={{ minWidth: 400 }}
+          onFinish={onFinish}
+          onFinishFailed={onFinishFailed}
+          autoComplete="off"
         >
-          <Radio.Group options={options} optionType="button" />
-        </Form.Item>
+          <Form.Item
+            label="Email type"
+            name="emailType"
+            rules={[
+              { required: true, message: "Please select your Email type!" },
+            ]}
+          >
+            <Radio.Group options={options} optionType="button" />
+          </Form.Item>
 
-        <Form.Item
-          label="Email address"
-          name="email"
-          rules={[
-            { required: true, message: "Please input your Email address!" },
-          ]}
-        >
-          <Input />
-        </Form.Item>
+          <Form.Item
+            label="Email address"
+            name="email"
+            rules={[
+              { required: true, message: "Please input your Email address!" },
+            ]}
+          >
+            <Input />
+          </Form.Item>
 
-        <Form.Item
-          label="Password"
-          name="password"
-          rules={[{ required: true, message: "Please input your password!" }]}
-        >
-          <Input.Password />
-        </Form.Item>
+          <Form.Item
+            label="Password"
+            name="password"
+            rules={[{ required: true, message: "Please input your password!" }]}
+          >
+            <Input.Password />
+          </Form.Item>
 
-        <Form.Item
-          label="Kunpro key"
-          name="kunproKey"
-          rules={[{ required: true, message: "Please input your Kunpro key!" }]}
-        >
-          <Input />
-        </Form.Item>
+          <Form.Item
+            label="Kunpro key"
+            name="kunproKey"
+            rules={[
+              { required: true, message: "Please input your Kunpro key!" },
+            ]}
+          >
+            <Input />
+          </Form.Item>
 
-        <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-          <Button type="primary" htmlType="submit">
-            Login
-          </Button>
-        </Form.Item>
-      </Form>
-    </div>
+          <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+            <Button type="primary" htmlType="submit">
+              Login
+            </Button>
+          </Form.Item>
+        </Form>
+      </div>
+    </>
   );
 }
 
