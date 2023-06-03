@@ -32,6 +32,8 @@ function List() {
 
   const [addMail] = useMutation(ADD_MAIL);
 
+  const [currentState, setCurrentState] = useState("serviceIsRunning");
+
   // 每十分钟检查一次邮件数量
   async function checkTheNewMail() {
     try {
@@ -157,7 +159,7 @@ function List() {
   return (
     <>
       {contextHolder}
-      <div>111</div>
+      <div>{currentState}</div>
     </>
   );
 }
