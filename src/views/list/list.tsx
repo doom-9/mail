@@ -145,6 +145,8 @@ function List() {
         numberOfCacheMail
       );
 
+      console.log(newMailArray);
+      
       for (const item of newMailArray) {
         if (
           [
