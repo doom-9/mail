@@ -24,7 +24,6 @@ module.exports = {
           owner: "doom-9",
           name: "mail",
         },
-        authToken: "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",
         draft: true,
         prerelease: false,
       },
