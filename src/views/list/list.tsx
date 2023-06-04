@@ -10,8 +10,10 @@ const ADD_MAIL = gql`
   mutation CreateLeadsForApp($input: NewEmailLeadsInput!) {
     createLeadsForApp(input: $input) {
       email_id
-      html_body
-      subject
+      replies {
+        body
+        subject
+      }
       to
     }
   }
@@ -146,7 +148,7 @@ function List() {
       );
 
       console.log(newMailArray);
-      
+
       for (const item of newMailArray) {
         if (
           [
@@ -169,23 +171,26 @@ function List() {
             async onCompleted(data, clientOptions) {
               try {
                 const {
-                  createLeadsForApp: { to, subject, html_body },
+                  createLeadsForApp: { to, replies },
                 } = data;
 
-                await ipcRenderer.invoke(
-                  "sendMail",
-                  emailType,
-                  email,
-                  pass,
-                  to,
-                  subject,
-                  html_body
-                );
+                for (const item of replies) {
+                  const { body, subject } = item;
+                  await ipcRenderer.invoke(
+                    "sendMail",
+                    emailType,
+                    email,
+                    pass,
+                    to,
+                    subject,
+                    body
+                  );
 
-                messageApi.open({
-                  type: "success",
-                  content: "sentSuccessfully",
-                });
+                  messageApi.open({
+                    type: "success",
+                    content: "sentSuccessfully",
+                  });
+                }
               } catch (error) {
                 messageApi.open({
                   type: "error",
@@ -222,7 +227,7 @@ function List() {
 
       localStorage.setItem("numberOfCacheMail", String(res));
 
-      initialInspection()
+      initialInspection();
 
       if (!Timer) {
         setTimer(

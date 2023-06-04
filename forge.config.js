@@ -1,5 +1,7 @@
 module.exports = {
-  packagerConfig: {},
+  packagerConfig: {
+    // osxSign: {},
+  },
   rebuildConfig: {},
   makers: [
     {
@@ -7,20 +9,20 @@ module.exports = {
       config: {},
     },
     {
-      name: "@electron-forge/maker-zip",
-      platforms: ["darwin"],
-    },
-    {
-      name: "@electron-forge/maker-deb",
-      config: {},
-    },
-    {
-      name: "@electron-forge/maker-rpm",
-      config: {},
-    },
-    {
       name: "@electron-forge/maker-dmg",
       config: {},
     },
+  ],
+  publishers: [
+    // {
+    //   name: "@electron-forge/publisher-github",
+    //   config: {
+    //     repository: {
+    //       owner: "doom-9",
+    //       name: "mail",
+    //     },
+    //     authToken: "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",
+    //   },
+    // },
   ],
 };
