@@ -1,7 +1,8 @@
 module.exports = {
   packagerConfig: {
     osxSign: {
-      identity:'Developer ID Application: Root Sports Investment (Beijing) Co., Ltd.'
+      identity:
+        "Developer ID Application: Root Sports Investment (Beijing) Co., Ltd.",
     },
   },
   rebuildConfig: {},
@@ -23,7 +24,9 @@ module.exports = {
           owner: "doom-9",
           name: "mail",
         },
-        authToken: "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",
+        authToken: "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",
+        draft: true,
+        prerelease: false,
       },
     },
   ],
