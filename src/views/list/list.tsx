@@ -207,6 +207,7 @@ function List() {
           });
         }
       }
+      localStorage.setItem("InitiallyChecked", "yes");
     } catch (error) {
       messageApi.open({
         type: "error",
@@ -227,7 +228,9 @@ function List() {
 
       localStorage.setItem("numberOfCacheMail", String(res));
 
-      initialInspection();
+      if (!(localStorage.getItem("InitiallyChecked") === "yes")) {
+        initialInspection();
+      }
 
       if (!Timer) {
         setTimer(
