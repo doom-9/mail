@@ -48,6 +48,11 @@ jobs:
         run: |
           yarn make
 
+      - name: build mac app
+        if: matrix.os == 'macos-latest'
+        run: |
+          yarn make-mac-x64
+
         # step6: upload artifacts
       - name: upload artifacts
         uses: actions/upload-artifact@v3
