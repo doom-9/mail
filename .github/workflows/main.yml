@@ -41,7 +41,7 @@ jobs:
       - name: build windows app
         if: matrix.os == 'windows-latest'
         run: |
-          yarn make
+          yarn make-window
 
       - name: build mac-arm64 app
         if: matrix.os == 'macos-latest'
