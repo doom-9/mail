@@ -43,14 +43,14 @@ jobs:
         run: |
           npm run make
         env:
-          GH_TOKEN: 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
+          GH_TOKEN: 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
       
       - name: build mac app
         if: matrix.os == 'macos-latest'
         run: |
           npm run make
         env:
-          GH_TOKEN: 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
+          GH_TOKEN: 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
 
         # step5: cleanup artifacts in out
       - name: cleanup artifacts
