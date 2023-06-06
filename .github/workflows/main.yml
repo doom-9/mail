@@ -43,12 +43,12 @@ jobs:
         run: |
           yarn make
 
-      - name: build mac app
+      - name: build mac-arm64 app
         if: matrix.os == 'macos-latest'
         run: |
-          yarn make
+          yarn make-mac-arm64
 
-      - name: build mac app
+      - name: build mac-x64 app
         if: matrix.os == 'macos-latest'
         run: |
           yarn make-mac-x64
