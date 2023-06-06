@@ -20,7 +20,8 @@
     "start": "electron-forge start",
     "package": "vite build && electron-forge package",
     "make-mac-arm64": "vite build && electron-forge make --platform=darwin --arch=arm64",
-    "make-mac-x64": "vite build && electron-forge make --platform=darwin --arch=x64"
+    "make-mac-x64": "vite build && electron-forge make --platform=darwin --arch=x64",
+    "make-window": "vite build && electron-forge make"
   },
   "dependencies": {
     "@apollo/client": "^3.7.15",
